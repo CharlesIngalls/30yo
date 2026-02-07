@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitation Anniversaire de Charles - 30 Ans (Cyberpunk)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Source Code Pro', monospace;
+            margin: 0;
+            padding: 0;
+            background-color: #0d0221;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #d4d4d4;
+            overflow: hidden;
+            position: relative;
+        }
+        .ide-window {
+            background-color: rgba(13, 2, 33, 0.8);
+            backdrop-filter: blur(6px);
+            border-radius: 5px;
+            box-shadow: 0 0 35px rgba(255, 0, 150, 0.6), 0 0 20px rgba(0, 191, 255, 0.6);
+            max-width: 900px;
+            width: 95%;
+            border: 1px solid #ff0096;
+            display: flex;
+            flex-direction: column;
+            position: relative; /* Needed for absolute positioning of overlay */
+        }
+        .tab-bar {
+            display: flex;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-bottom: 1px solid #00bfff;
+        }
+        .tab {
+            background-color: rgba(13, 2, 33, 0.9);
+            padding: 8px 20px;
+            color: #00bfff;
+        }
+        .editor {
+            display: flex;
+            padding: 20px;
+        }
+        .line-numbers {
+            padding-right: 20px;
+            text-align: right;
+            color: #4f5868;
+        }
+        .code-content {
+            text-align: left;
+            flex-grow: 1; /* Allow content to take available space */
+        }
+        .main-number {
+            font-family: 'Audiowide', cursive;
+            font-size: 9em;
+            color: #ff0096;
+            text-shadow: 0 0 10px #ff0096, 0 0 20px #ff0096, 0 0 40px #ff0096;
+            line-height: 1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .code-line {
+            min-height: 1.5em;
+        }
+        .keyword { color: #00bfff; }
+        .type { color: #f8f8f2; }
+        .variable { color: #ff0096; }
+        .string { color: #e6db74; }
+        .comment { color: #75715e; }
+        .image-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 50%;
+            height: auto;
+            border-radius: 4px;
+            border: 3px solid #00bfff;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.7);
+        }
+        /* Overlay and interactivity styles */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #0d0221;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+        }
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .run-button {
+            background-color: #00bfff;
+            color: #0d0221;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-family: 'Audiowide', cursive;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.7);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .run-button:hover {
+            background-color: #00e5ff;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.9);
+        }
+        .terminal {
+            background-color: #0d0221;
+            border: 1px solid #00bfff;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+            font-size: 1.1em;
+            color: #00ff00;
+            text-align: left;
+            white-space: pre-wrap;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        .terminal.visible {
+            opacity: 1;
+        }
+        .terminal-line {
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .content-hidden {
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            visibility: hidden;
+        }
+        .content-visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            .ide-window {
+                width: 98%;
+                padding: 10px;
+            }
+            .editor {
+                padding: 15px;
+            }
+            .line-numbers {
+                padding-right: 10px;
+                font-size: 0.8rem;
+            }
+            .code-content {
+                font-size: 0.9rem;
+            }
+            .main-number { /* Removed in the final version, but keeping for reference if it was still in the old string */
+                font-size: 4rem;
+                line-height: 1.1;
+            }
+            .image-container img {
+                max-width: 70%;
+            }
+            .run-button {
+                font-size: 1.1rem;
+                padding: 10px 20px;
+            }
+            .terminal {
+                font-size: 0.9rem;
+                padding: 15px;
+            }
+            .code-line {
+                min-height: 1.2em;
+                word-break: break-all;
+                white-space: normal;
+            }
+            .tab {
+                padding: 6px 15px;
+                font-size: 0.9rem;
+            }
+            .code-line .keyword, .code-line .type, .code-line .variable, .code-line .string, .code-line .comment {
+                font-size: 0.9rem;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                font-size: 12px;
+            }
+            .ide-window {
+                border-radius: 0;
+                padding: 5px;
+            }
+            .editor {
+                padding: 10px 5px;
+            }
+            .line-numbers {
+                display: none;
+            }
+            .code-content {
+                font-size: 0.75rem;
+                overflow-x: auto; /* Allow horizontal scrolling if necessary */
+            }
+            .code-line {
+                white-space: nowrap; /* Prevent text from wrapping */
+            }
+            .main-number { /* Removed in the final version, but keeping for reference if it was still in the old string */
+                font-size: 2rem;
+                margin-bottom: 5px;
+                text-shadow: 0 0 3px #ff0096, 0 0 8px #00bfff;
+            }
+            .image-container img {
+                max-width: 90%;
+            }
+            .run-button {
+                font-size: 0.9rem;
+                padding: 8px 15px;
+            }
+            .terminal {
+                font-size: 0.75rem;
+                padding: 10px;
+            }
+            .tab {
+                padding: 4px 10px;
+                font-size: 0.8rem;
+            }
+            .code-line .keyword, .code-line .type, .code-line .variable, .code-line .string, .code-line .comment {
+                font-size: 0.75rem;
+            }
+        }
+    </style></head>
+<body>
+    <div class="ide-window">
+        <div class="tab-bar">
+            <div class="tab">BirthdayEvent.java</div>
+        </div>
+        <div class="editor">
+            <div class="line-numbers">
+                <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div>
+            </div>
+            <div class="code-content">
+                <div class="code-line"><span class="keyword">package</span> ch.charles.birthday;</div>
+                <div class="code-line"></div>
+                <div class="code-line"><span class="keyword">public class</span> <span class="type">BirthdayEvent</span> {</div>
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Vous êtes invités à célébrer le 30ème anniversaire de Charles.</span></div>
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public static void</span> main(<span class="type">String</span>[] <span class="variable">args</span>) {</div>
+                <div class="code-line"></div>
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span> <span class="variable">date</span> = <span class="string">"Samedi 11 avril 2026"</span>;</div>
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span> <span class="variable">heure</span> = <span class="string">"11h30"</span>;</div>
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span> <span class="variable">lieu</span> = <span class="string">"Estavayer-le-Lac, Champ-de-Lune 41"</span>;</div>
+                <div class="code-line"></div>
+
+
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">System</span>.out.println(<span class="string">"RSVP avant le 20 janvier 2026: rsvp@example.com"</span>);</div>
+                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                <div class="code-line">}</div>
+                <div class="image-container">
+                    <img src="30yoCharles.jpeg" alt="Charles at 4 years old">
+                </div>
+            </div>
+        </div>
+        <!-- Overlay for the interactive part -->
+        <div id="overlay" class="overlay">
+            <button class="run-button" onclick="runProgram()">Exécuter le Programme</button>
+            <div id="terminal" class="terminal"></div>
+        </div>
+
+        <script>
+            // Ensure editor content is hidden initially
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelector('.editor').classList.add('content-hidden');
+            });
+
+            function runProgram() {
+                document.getElementById('overlay').style.backgroundColor = 'rgba(13, 2, 33, 0.95)';
+                document.querySelector('.run-button').style.display = 'none';
+                const terminal = document.getElementById('terminal');
+                terminal.classList.add('visible');
+                terminal.innerHTML = ''; // Clear previous output
+
+                const messages = [
+                    "Compiling BirthdayEvent.java...",
+                    "Dependencies resolved.",
+                    "Building project: CyberpunkInvite v1.0.0...",
+                    "Deployment initiated to Neo-Paris server...",
+                    "Database synchronization: success.",
+                    "Launching application...",
+                    "Access Granted. Displaying secure invitation data...",
+                    " "
+                ];
+
+                let i = 0;
+                function typeMessage() {
+                    if (i < messages.length) {
+                        const line = document.createElement('div');
+                        line.classList.add('terminal-line');
+                        line.textContent = '> ' + messages[i];
+                        terminal.appendChild(line);
+                        line.style.animationDelay = (i * 0.7) + 's'; // Staggered animation
+                        i++;
+                        setTimeout(typeMessage, 700); // Adjust delay between lines
+                    } else {
+                        // After all messages, hide terminal and show content
+                        setTimeout(() => {
+                            terminal.classList.remove('visible');
+                            const overlay = document.getElementById('overlay');
+                            overlay.classList.add('hidden'); // Start opacity transition
+                            
+                            // After opacity transition, make it non-interactive and truly hidden
+                            overlay.addEventListener('transitionend', function handler() {
+                                overlay.style.display = 'none';
+                                overlay.removeEventListener('transitionend', handler);
+                            });
+
+                            const editor = document.querySelector('.editor');
+                            editor.classList.remove('content-hidden');
+                            editor.classList.add('content-visible');
+                        }, 2000); // Delay before showing content
+                    }
+                }
+                typeMessage();
+            }
+        </script>
+    </div>
+</body>
+</html>
