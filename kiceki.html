@@ -484,7 +484,9 @@
 //  CONFIGURATION — modifie ici pour personnaliser
 // ══════════════════════════════════════════════════════════════
 const CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbxdv3HDA0mZijstCvzgphLfanjnzFRzlvbg9IF9jYLxy2LYBdgQbCLCNjwhTWszVeuBWA/exec',   // ← URL Google Apps Script
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbyUtB6FpaMrJYzgebawdO_cwJ2R0qgyJjpTbO-3HpbXe_Uw6oDSaAKOtZuFvRT9Yl2ADA/exec',   // ← URL Google Apps Script (pour écrire les scores)
+  sheetsId:  '1xBFaGpVeMjpvYs5KIj6ciiHCfie6KyPpU7rEeCkbeVc',   // ← ID du Google Sheet (dans l'URL : .../spreadsheets/d/{ICI}/edit)
+                   //   Partager le sheet : "Tout le monde avec le lien" → Lecteur
 
   // Les 4 prénoms affichés comme réponses (indices 0-3)
   names: ['Jean', 'Guillaume', 'Bryan', 'Bob'],
@@ -796,16 +798,16 @@ function renderLeaderboard(myScore, myMax, alreadyPlayed) {
 
   const list = $('leaderboard-list');
 
-  if (!CONFIG.scriptUrl) {
+  if (!CONFIG.sheetsId) {
     list.innerHTML = '<div class="lb-empty">Classement bientôt disponible ⏳</div>';
     return;
   }
 
   list.innerHTML = '<div class="lb-empty">Chargement…</div>';
 
-  fetchJsonp(CONFIG.scriptUrl)
+  fetchGviz(CONFIG.sheetsId)
     .then(rows => {
-      if (!Array.isArray(rows) || rows.length === 0) {
+      if (!rows.length) {
         list.innerHTML = '<div class="lb-empty">Aucun score pour l\'instant. Sois le premier ! 🎉</div>';
         return;
       }
@@ -825,14 +827,31 @@ function renderLeaderboard(myScore, myMax, alreadyPlayed) {
     });
 }
 
-function fetchJsonp(url) {
+// Reads the leaderboard via the Google Sheets gviz JSONP API (no CORS issues).
+// The sheet must be shared as "Anyone with the link can view".
+function fetchGviz(sheetId) {
+  const tq  = encodeURIComponent('SELECT B,C,D ORDER BY C DESC');
+  const url = 'https://docs.google.com/spreadsheets/d/' + sheetId +
+              '/gviz/tq?tqx=out:json&headers=0&tq=' + tq;
   return new Promise((resolve, reject) => {
-    const cb      = 'kiceki_cb_' + Date.now();
+    const cb      = 'kiceki_gviz_' + Date.now();
     const script  = document.createElement('script');
     const cleanup = () => { delete window[cb]; script.remove(); };
-    window[cb]    = data => { cleanup(); resolve(data); };
+    window[cb] = data => {
+      cleanup();
+      try {
+        const rows = (data.table.rows || [])
+          .map(r => ({
+            nickname: r.c[0] && r.c[0].v ? String(r.c[0].v) : '',
+            score:    r.c[1] ? Number(r.c[1].v) : 0,
+            max:      r.c[2] ? Number(r.c[2].v) : 0
+          }))
+          .filter(r => r.nickname);
+        resolve(rows);
+      } catch (e) { reject(e); }
+    };
     script.onerror = () => { cleanup(); reject(); };
-    script.src    = url + '?callback=' + cb + '&t=' + Date.now();
+    script.src = url + '&callback=' + cb;
     document.head.appendChild(script);
   });
 }
