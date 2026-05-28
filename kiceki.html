@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kicéki ?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #0f0c29 0%, #302b63 60%, #24243e 100%);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px 16px 64px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 24px 72px rgba(0, 0, 0, 0.5);
+      max-width: 520px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .card-header {
+      background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+      padding: 36px 28px 28px;
+      text-align: center;
+      color: #1a1106;
+    }
+    .header-tag {
+      font-size: 0.7em;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 6px;
+    }
+    .card-header h1 {
+      font-size: 2.6em;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .card-header .tagline {
+      margin-top: 8px;
+      font-size: 0.88em;
+      opacity: 0.7;
+      font-weight: 500;
+    }
+
+    /* ── Screens ─────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active {
+      display: block;
+      animation: fadeUp 0.22s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .body { padding: 28px 24px 32px; }
+
+    /* ── Buttons ─────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.97em;
+      cursor: pointer;
+      transition: transform 0.12s, opacity 0.18s;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.55; cursor: default; transform: none; }
+    .btn-primary {
+      background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+      color: #1a1106;
+      box-shadow: 0 4px 18px rgba(247, 151, 30, 0.38);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: #9ca3af;
+      border: 2px solid #e5e7eb;
+      margin-top: 10px;
+    }
+    .btn-ghost:hover { border-color: #f7971e; color: #f7971e; }
+
+    .hidden { display: none !important; }
+
+    /* ── Nickname screen ─────────────────────────────── */
+    .welcome-icon { font-size: 3.2em; text-align: center; margin-bottom: 14px; }
+    .welcome-desc {
+      color: #6b7280;
+      font-size: 0.9em;
+      line-height: 1.65;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .field-label {
+      display: block;
+      font-size: 0.82em;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+    .text-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.97em;
+      color: #111827;
+      outline: none;
+      transition: border-color 0.18s;
+      margin-bottom: 18px;
+    }
+    .text-input:focus { border-color: #f7971e; }
+    .text-input.error { border-color: #ef4444; }
+
+    /* ── Progress ────────────────────────────────────── */
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: #f3f4f6;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f7971e, #ffd200);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 0.78em;
+      font-weight: 700;
+      color: #f7971e;
+      white-space: nowrap;
+    }
+
+    /* ── Question ────────────────────────────────────── */
+    .q-kicker {
+      font-size: 0.72em;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #d1d5db;
+      margin-bottom: 6px;
+    }
+    .question-text {
+      font-size: 1.08em;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.55;
+      margin-bottom: 10px;
+    }
+    .answer-hint {
+      font-size: 0.78em;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .answer-hint.is-single {
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+    }
+    .answer-hint.is-multi {
+      color: #d97706;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    /* ── Options ─────────────────────────────────────── */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .option-btn {
+      background: #fff;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 13px 16px;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95em;
+      font-weight: 600;
+      color: #111827;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.16s, background 0.16s, transform 0.1s;
+      width: 100%;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: #f7971e;
+      background: #fffbf0;
+      transform: translateX(3px);
+    }
+    .option-btn:disabled { cursor: default; transform: none; }
+    .opt-letter {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px; /* overridden to 50% for single-answer */
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82em;
+      font-weight: 800;
+      color: #9ca3af;
+      flex-shrink: 0;
+      transition: background 0.16s, color 0.16s;
+    }
+
+    .option-btn.selected { border-color: #3b82f6; background: #eff6ff; }
+    .option-btn.selected .opt-letter { background: #3b82f6; color: #fff; }
+
+    .option-btn.correct { border-color: #22c55e; background: #f0fdf4; }
+    .option-btn.correct .opt-letter { background: #22c55e; color: #fff; }
+    .option-btn.correct .opt-name { color: #15803d; }
+
+    .option-btn.wrong { border-color: #ef4444; background: #fef2f2; }
+    .option-btn.wrong .opt-letter { background: #ef4444; color: #fff; }
+    .option-btn.wrong .opt-name { color: #b91c1c; }
+
+    .option-btn.unselected-reveal { opacity: 0.32; }
+
+    /* Single-answer: circular indicator (radio-like) */
+    .options-list.is-single .opt-letter { border-radius: 50%; }
+
+    /* ── Reveal banner ───────────────────────────────── */
+    .reveal-banner {
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.88em;
+      font-weight: 600;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .reveal-banner.is-correct { background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; }
+    .reveal-banner.is-wrong   { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca; }
+    .reveal-banner.is-partial { background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; }
+
+    /* ── Results screen ──────────────────────────────── */
+    .score-block {
+      text-align: center;
+      padding: 20px 0 24px;
+      border-bottom: 1px solid #f3f4f6;
+      margin-bottom: 24px;
+    }
+    .score-who { font-size: 0.88em; color: #9ca3af; font-weight: 500; margin-bottom: 6px; }
+    .score-big {
+      font-size: 4.8em;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1;
+    }
+    .score-denom { font-size: 0.38em; color: #d1d5db; font-weight: 700; }
+    .score-msg { margin-top: 12px; font-size: 0.9em; color: #6b7280; font-weight: 500; }
+    .submit-note {
+      text-align: center;
+      font-size: 0.8em;
+      color: #9ca3af;
+      margin-top: 10px;
+    }
+
+    /* ── Leaderboard screen ──────────────────────────── */
+    .already-notice {
+      background: #fffbeb;
+      border: 1.5px dashed #fde68a;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .lb-my-score-block {
+      text-align: center;
+      padding: 16px 0 20px;
+      border-bottom: 1px solid #f3f4f6;
+      margin-bottom: 20px;
+    }
+    .lb-title {
+      font-size: 0.95em;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 12px;
+      letter-spacing: -0.2px;
+    }
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      margin-bottom: 7px;
+      font-size: 0.9em;
+      font-weight: 600;
+      background: #f9fafb;
+    }
+    .lb-row.is-me { background: #fffbf0; border: 2px solid #f7971e; }
+    .lb-row.gold   { background: #fffbeb; }
+    .lb-row.silver { background: #f8fafc; }
+    .lb-row.bronze { background: #fff7f0; }
+    .lb-rank { width: 26px; text-align: center; font-size: 1.1em; flex-shrink: 0; }
+    .lb-name { flex: 1; color: #111827; }
+    .lb-score { color: #f7971e; font-weight: 800; white-space: nowrap; }
+    .lb-empty {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 0.88em;
+      padding: 24px 0;
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 480px) {
+      body { padding: 16px 12px 48px; }
+      .card-header { padding: 28px 20px 22px; }
+      .card-header h1 { font-size: 2.2em; }
+      .body { padding: 20px 18px 26px; }
+      .score-big { font-size: 4em; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="header-tag">Quiz d'anniversaire</div>
+    <h1>Kicéki&nbsp;?</h1>
+    <p class="tagline">À chaque question, une seule bonne réponse… ou plusieurs !</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SCREEN 1 — Nickname
+  ══════════════════════════════════════════════════ -->
+  <section id="screen-nickname" class="screen active">
+    <div class="body">
+      <div class="welcome-icon">🎉</div>
+      <p class="welcome-desc">
+        Choisis le ou les prénoms qui correspondent le mieux à chaque question.
+        Ta progression est sauvegardée automatiquement.
+      </p>
+      <label class="field-label" for="input-nickname">Ton prénom</label>
+      <input type="text" id="input-nickname" class="text-input"
+             placeholder="ex : Sophie" autocomplete="off" maxlength="30">
+      <button id="btn-start" class="btn btn-primary">Commencer le quiz →</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SCREEN 2 — Question
+  ══════════════════════════════════════════════════ -->
+  <section id="screen-question" class="screen">
+    <div class="body">
+      <div class="progress-row">
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+        </div>
+        <span id="progress-label" class="progress-label">1 / 20</span>
+      </div>
+
+      <div class="q-kicker">Question <span id="q-num">1</span></div>
+      <p id="question-text" class="question-text"></p>
+      <div id="answer-hint" class="answer-hint"></div>
+
+      <div id="options-list" class="options-list">
+        <button class="option-btn" data-index="0">
+          <span class="opt-letter">A</span><span class="opt-name" id="opt-0"></span>
+        </button>
+        <button class="option-btn" data-index="1">
+          <span class="opt-letter">B</span><span class="opt-name" id="opt-1"></span>
+        </button>
+        <button class="option-btn" data-index="2">
+          <span class="opt-letter">C</span><span class="opt-name" id="opt-2"></span>
+        </button>
+        <button class="option-btn" data-index="3">
+          <span class="opt-letter">D</span><span class="opt-name" id="opt-3"></span>
+        </button>
+      </div>
+
+      <div id="reveal-banner" class="reveal-banner hidden"></div>
+
+      <button id="btn-validate" class="btn btn-primary hidden">Valider ma réponse ✓</button>
+      <button id="btn-next"     class="btn btn-primary hidden">Suivant →</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SCREEN 3 — Results
+  ══════════════════════════════════════════════════ -->
+  <section id="screen-results" class="screen">
+    <div class="body">
+      <div class="score-block">
+        <div class="score-who" id="results-nickname"></div>
+        <div class="score-big">
+          <span id="score-value">0</span><span class="score-denom"> / <span id="score-max">20</span></span>
+        </div>
+        <div class="score-msg" id="score-msg"></div>
+      </div>
+      <button id="btn-submit" class="btn btn-primary">Envoyer mon score &amp; voir le classement 🏆</button>
+      <p class="submit-note" id="submit-note"></p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       SCREEN 4 — Leaderboard
+  ══════════════════════════════════════════════════ -->
+  <section id="screen-leaderboard" class="screen">
+    <div class="body">
+      <div id="already-notice" class="already-notice hidden">
+        Tu as déjà participé — voici ton score et le classement actuel.
+      </div>
+      <div class="lb-my-score-block">
+        <div class="score-who" id="lb-my-nickname"></div>
+        <div class="score-big">
+          <span id="lb-my-score">0</span><span class="score-denom"> / <span id="lb-my-max">20</span></span>
+        </div>
+      </div>
+      <div class="lb-title">🏆 Classement</div>
+      <div id="leaderboard-list"><div class="lb-empty">Chargement…</div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  GOOGLE APPS SCRIPT — setup (lire avant de publier)
+// ══════════════════════════════════════════════════════════════
+//
+//  1. Ouvrez script.google.com → nouveau projet → collez ce code :
+//
+//     function doPost(e) {
+//       SpreadsheetApp.getActiveSpreadsheet().getActiveSheet()
+//         .appendRow([new Date(), e.parameter.nickname,
+//                     +e.parameter.score, +e.parameter.max]);
+//       return ContentService.createTextOutput('ok');
+//     }
+//
+//     function doGet() {
+//       var rows = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet()
+//         .getDataRange().getValues().slice(1)
+//         .map(function(r) { return { nickname: r[1], score: +r[2], max: +r[3] }; });
+//       rows.sort(function(a, b) { return b.score - a.score; });
+//       return ContentService.createTextOutput(JSON.stringify(rows))
+//         .setMimeType(ContentService.MimeType.JSON);
+//     }
+//
+//  2. Déployer → Nouvelle version → Application Web
+//     • Exécuter en tant que : Moi
+//     • Accès : Tout le monde (même anonyme)
+//  3. Copiez l'URL de déploiement → collez-la dans scriptUrl ci-dessous
+//
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURATION — modifie ici pour personnaliser
+// ══════════════════════════════════════════════════════════════
+const CONFIG = {
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbwHIeygn8opISXyVjc0q1chtjI4ECRR42PU2GdLO9lRIhga8pdD0QPslIx7ErdmA_Bnhg/exec',   // ← URL Google Apps Script
+
+  // Les 4 prénoms affichés comme réponses (indices 0-3)
+  names: ['Jean', 'Guillaume', 'Bryan', 'Bob'],
+
+  // answers : tableau d'indices des bonnes réponses (0-3)
+  //   Une seule  → answers: [2]
+  //   Plusieurs  → answers: [0, 3]
+  questions: [
+    { q: "Kicéki qui ronfle le plus fort en soirée ?",                      answers: [0]    },
+    { q: "Kicéki qui arrive systématiquement en retard ?",                  answers: [2]    },
+    { q: "Kicéki qui peut finir une pizza entière seul·e ?",               answers: [1]    },
+    { q: "Kicéki qui a toujours un avis sur tout ?",                        answers: [0, 3] },
+    { q: "Kicéki qui se perd même avec Google Maps ?",                      answers: [3]    },
+    { q: "Kicéki qui pleurerait devant un Disney ?",                        answers: [1, 2] },
+    { q: "Kicéki qui est toujours partant·e pour une bière ?",             answers: [0]    },
+    { q: "Kicéki qui change d'avis comme de chemise ?",                    answers: [2]    },
+    { q: "Kicéki qui a le pire sens de l'orientation ?",                   answers: [3]    },
+    { q: "Kicéki qui est le/la plus à l'aise en soirée ?",                answers: [0, 1] },
+    { q: "Kicéki qui peut s'endormir n'importe où ?",                      answers: [1]    },
+    { q: "Kicéki qui spoile les films sans le vouloir ?",                  answers: [2]    },
+    { q: "Kicéki qui oublie le plus souvent son téléphone ?",              answers: [3]    },
+    { q: "Kicéki qui connaît le plus de blagues (pas drôles) ?",           answers: [0]    },
+    { q: "Kicéki qui ferait un excellent chef cuisinier ?",                 answers: [1, 2] },
+    { q: "Kicéki qui parle le plus facilement aux inconnus ?",             answers: [0]    },
+    { q: "Kicéki qui serait le/la plus nul·le sur une île déserte ?",     answers: [3]    },
+    { q: "Kicéki qui a déjà raté un transport par sa propre faute ?",     answers: [2]    },
+    { q: "Kicéki qui possède le plus de gadgets inutiles ?",               answers: [1]    },
+    { q: "Kicéki qui sera le/la dernier·e à quitter la fête ce soir ?",  answers: [0, 3] },
+  ]
+};
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+const SK = 'kiceki';
+const DK = 'kiceki_done';
+
+let state = freshState();
+
+function freshState() {
+  return {
+    status: 'nickname',
+    nickname: '',
+    currentIndex: 0,
+    selections: CONFIG.questions.map(() => [])
+  };
+}
+
+function saveState() {
+  localStorage.setItem(SK, JSON.stringify(state));
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SK);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s && typeof s.nickname === 'string' && Array.isArray(s.selections)) {
+      while (s.selections.length < CONFIG.questions.length) s.selections.push([]);
+      state = s;
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SCORING
+// ══════════════════════════════════════════════════════════════
+function computeScore() {
+  return CONFIG.questions.reduce((total, q, i) => {
+    const sel = state.selections[i] || [];
+    if (q.answers.length === 1) {
+      return total + (sel.includes(q.answers[0]) ? 1 : 0);
+    }
+    const pts = sel.reduce((p, idx) => p + (q.answers.includes(idx) ? 1 : -1), 0);
+    return total + Math.max(0, pts);
+  }, 0);
+}
+
+function maxScore() {
+  return CONFIG.questions.reduce((t, q) => t + q.answers.length, 0);
+}
+
+function questionScore(i) {
+  const q   = CONFIG.questions[i];
+  const sel = state.selections[i] || [];
+  if (q.answers.length === 1) return sel.includes(q.answers[0]) ? 1 : 0;
+  const pts = sel.reduce((p, idx) => p + (q.answers.includes(idx) ? 1 : -1), 0);
+  return Math.max(0, pts);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════════
+const $   = id => document.getElementById(id);
+const esc = s  => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function showScreen(name) {
+  ['nickname', 'question', 'results', 'leaderboard'].forEach(s => {
+    $('screen-' + s).classList.toggle('active', s === name);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NICKNAME SCREEN
+// ══════════════════════════════════════════════════════════════
+$('btn-start').addEventListener('click', () => {
+  const nick = $('input-nickname').value.trim();
+  if (!nick) {
+    $('input-nickname').classList.add('error');
+    $('input-nickname').focus();
+    return;
+  }
+  $('input-nickname').classList.remove('error');
+  state = freshState();
+  state.nickname = nick;
+  state.status   = 'asking';
+  saveState();
+  renderQuestion();
+  showScreen('question');
+});
+
+// ══════════════════════════════════════════════════════════════
+//  QUESTION SCREEN
+// ══════════════════════════════════════════════════════════════
+function renderQuestion() {
+  const q          = CONFIG.questions[state.currentIndex];
+  const isMulti    = q.answers.length > 1;
+  const sel        = state.selections[state.currentIndex];
+  const isRevealed = state.status === 'confirmed';
+
+  // Progress
+  const pct = (state.currentIndex / CONFIG.questions.length) * 100;
+  $('progress-fill').style.width = pct + '%';
+  $('progress-label').textContent = `${state.currentIndex + 1} / ${CONFIG.questions.length}`;
+  $('q-num').textContent = state.currentIndex + 1;
+
+  // Question
+  $('question-text').textContent = q.q;
+
+  const hint = $('answer-hint');
+  if (isMulti) {
+    hint.className   = 'answer-hint is-multi';
+    hint.textContent = '⚡ Plusieurs bonnes réponses — sélectionne-les toutes';
+  } else {
+    hint.className   = 'answer-hint is-single';
+    hint.textContent = '🎯 Une seule bonne réponse';
+  }
+  $('options-list').className = 'options-list ' + (isMulti ? 'is-multi' : 'is-single');
+
+  // Option labels
+  CONFIG.names.forEach((name, i) => { $('opt-' + i).textContent = name; });
+
+  // Option states
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.className   = 'option-btn';
+    btn.disabled    = isRevealed;
+    const isCorrect = q.answers.includes(i);
+    const wasChosen = sel.includes(i);
+
+    if (isRevealed) {
+      if      ( isCorrect &&  wasChosen) btn.classList.add('correct');
+      else if (!isCorrect &&  wasChosen) btn.classList.add('wrong');
+      else if ( isCorrect && !wasChosen) btn.classList.add('correct', 'unselected-reveal');
+      else                               btn.classList.add('unselected-reveal');
+    } else if (wasChosen) {
+      btn.classList.add('selected');
+    }
+  });
+
+  // Reveal banner
+  const banner    = $('reveal-banner');
+  const btnVal    = $('btn-validate');
+  const btnNext   = $('btn-next');
+
+  if (isRevealed) {
+    banner.className = 'reveal-banner';
+    const pts    = questionScore(state.currentIndex);
+    const maxPts = q.answers.length;
+
+    if (pts === maxPts) {
+      banner.classList.add('is-correct');
+      banner.textContent = `✅ ${maxPts === 1 ? 'Bonne réponse !' : 'Parfait !'} +${pts} pt${pts > 1 ? 's' : ''}`;
+    } else if (pts > 0) {
+      banner.classList.add('is-partial');
+      banner.textContent = `⚡ Partiellement correct — +${pts} pt${pts > 1 ? 's' : ''} sur ${maxPts} possible${maxPts > 1 ? 's' : ''}`;
+    } else {
+      banner.classList.add('is-wrong');
+      const names = q.answers.map(idx => CONFIG.names[idx]).join(' et ');
+      banner.textContent = `❌ Raté — ${q.answers.length === 1 ? 'La bonne réponse était' : 'Les bonnes réponses étaient'} : ${names}`;
+    }
+
+    btnVal.classList.add('hidden');
+    btnNext.classList.remove('hidden');
+    btnNext.textContent = state.currentIndex < CONFIG.questions.length - 1
+      ? 'Suivant →'
+      : 'Voir mes résultats →';
+  } else {
+    banner.className = 'reveal-banner hidden';
+    btnNext.classList.add('hidden');
+    btnVal.classList.toggle('hidden', !isMulti || sel.length === 0);
+  }
+}
+
+// Option clicks
+document.querySelectorAll('.option-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (state.status !== 'asking') return;
+    const idx  = parseInt(btn.dataset.index, 10);
+    const q    = CONFIG.questions[state.currentIndex];
+    const sel  = state.selections[state.currentIndex];
+
+    if (q.answers.length > 1) {
+      const pos = sel.indexOf(idx);
+      if (pos === -1) sel.push(idx); else sel.splice(pos, 1);
+      saveState();
+      renderQuestion();
+    } else {
+      state.selections[state.currentIndex] = [idx];
+      state.status = 'confirmed';
+      saveState();
+      renderQuestion();
+    }
+  });
+});
+
+$('btn-validate').addEventListener('click', () => {
+  if (state.status !== 'asking') return;
+  if (state.selections[state.currentIndex].length === 0) return;
+  state.status = 'confirmed';
+  saveState();
+  renderQuestion();
+});
+
+$('btn-next').addEventListener('click', () => {
+  if (state.currentIndex < CONFIG.questions.length - 1) {
+    state.currentIndex++;
+    state.status = 'asking';
+    saveState();
+    renderQuestion();
+  } else {
+    state.status = 'results';
+    saveState();
+    renderResults();
+    showScreen('results');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  RESULTS SCREEN
+// ══════════════════════════════════════════════════════════════
+function renderResults() {
+  const score = computeScore();
+  const max   = maxScore();
+  const pct   = score / max;
+
+  $('results-nickname').textContent = state.nickname;
+  $('score-value').textContent      = score;
+  $('score-max').textContent        = max;
+
+  let msg;
+  if (pct === 1)       msg = 'Score parfait ! Tu mérites une médaille. 🥇';
+  else if (pct >= 0.8) msg = 'Excellent ! Tu es vraiment observateur·rice.';
+  else if (pct >= 0.6) msg = 'Pas mal du tout ! Tu les connais bien.';
+  else if (pct >= 0.4) msg = "On a quand même bien ri ensemble, non ?";
+  else                 msg = 'Hum… il va falloir se voir plus souvent ! 😅';
+
+  $('score-msg').textContent = msg;
+  $('submit-note').textContent = CONFIG.scriptUrl
+    ? ''
+    : 'Le classement en ligne n\'est pas encore configuré.';
+}
+
+$('btn-submit').addEventListener('click', async () => {
+  const score = computeScore();
+  const max   = maxScore();
+  const btn   = $('btn-submit');
+
+  btn.disabled    = true;
+  btn.textContent = 'Envoi en cours…';
+
+  if (CONFIG.scriptUrl) {
+    try {
+      await fetch(CONFIG.scriptUrl, {
+        method: 'POST',
+        mode:   'no-cors',
+        body:   new URLSearchParams({ nickname: state.nickname, score, max })
+      });
+    } catch (_) {}
+  }
+
+  localStorage.setItem(DK, '1');
+  state.status = 'submitted';
+  saveState();
+
+  renderLeaderboard(score, max, false);
+  showScreen('leaderboard');
+});
+
+// ══════════════════════════════════════════════════════════════
+//  LEADERBOARD SCREEN
+// ══════════════════════════════════════════════════════════════
+async function renderLeaderboard(myScore, myMax, alreadyPlayed) {
+  if (alreadyPlayed) $('already-notice').classList.remove('hidden');
+  else               $('already-notice').classList.add('hidden');
+
+  $('lb-my-nickname').textContent = state.nickname;
+  $('lb-my-score').textContent    = myScore !== undefined ? myScore : computeScore();
+  $('lb-my-max').textContent      = myMax   !== undefined ? myMax   : maxScore();
+
+  const list = $('leaderboard-list');
+
+  if (!CONFIG.scriptUrl) {
+    list.innerHTML = '<div class="lb-empty">Classement bientôt disponible ⏳</div>';
+    return;
+  }
+
+  list.innerHTML = '<div class="lb-empty">Chargement…</div>';
+
+  try {
+    const res  = await fetch(CONFIG.scriptUrl + '?t=' + Date.now());
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      list.innerHTML = '<div class="lb-empty">Aucun score pour l\'instant. Sois le premier ! 🎉</div>';
+      return;
+    }
+
+    const medals  = ['🥇', '🥈', '🥉'];
+    const classes = ['gold', 'silver', 'bronze'];
+
+    list.innerHTML = rows.map((row, i) => {
+      const isMe = row.nickname === state.nickname;
+      return `<div class="lb-row${isMe ? ' is-me' : ''}${i < 3 ? ' ' + classes[i] : ''}">
+        <span class="lb-rank">${medals[i] || (i + 1)}</span>
+        <span class="lb-name">${esc(row.nickname)}${isMe ? ' 👈' : ''}</span>
+        <span class="lb-score">${row.score}/${row.max}</span>
+      </div>`;
+    }).join('');
+  } catch (_) {
+    list.innerHTML = '<div class="lb-empty">Impossible de charger le classement.</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  if (localStorage.getItem(DK) === '1') {
+    renderLeaderboard(computeScore(), maxScore(), true);
+    showScreen('leaderboard');
+    return;
+  }
+
+  if (state.status === 'results' || state.status === 'submitted') {
+    renderResults();
+    showScreen('results');
+    return;
+  }
+
+  if (state.status === 'asking' || state.status === 'confirmed') {
+    renderQuestion();
+    showScreen('question');
+    return;
+  }
+
+  showScreen('nickname');
+});
+</script>
+</body>
+</html>
