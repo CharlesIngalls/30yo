@@ -484,7 +484,7 @@
 //  CONFIGURATION — modifie ici pour personnaliser
 // ══════════════════════════════════════════════════════════════
 const CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbwHIeygn8opISXyVjc0q1chtjI4ECRR42PU2GdLO9lRIhga8pdD0QPslIx7ErdmA_Bnhg/exec',   // ← URL Google Apps Script
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbxdv3HDA0mZijstCvzgphLfanjnzFRzlvbg9IF9jYLxy2LYBdgQbCLCNjwhTWszVeuBWA/exec',   // ← URL Google Apps Script
 
   // Les 4 prénoms affichés comme réponses (indices 0-3)
   names: ['Jean', 'Guillaume', 'Bryan', 'Bob'],
@@ -786,7 +786,7 @@ $('btn-submit').addEventListener('click', async () => {
 // ══════════════════════════════════════════════════════════════
 //  LEADERBOARD SCREEN
 // ══════════════════════════════════════════════════════════════
-async function renderLeaderboard(myScore, myMax, alreadyPlayed) {
+function renderLeaderboard(myScore, myMax, alreadyPlayed) {
   if (alreadyPlayed) $('already-notice').classList.remove('hidden');
   else               $('already-notice').classList.add('hidden');
 
@@ -803,29 +803,38 @@ async function renderLeaderboard(myScore, myMax, alreadyPlayed) {
 
   list.innerHTML = '<div class="lb-empty">Chargement…</div>';
 
-  try {
-    const res  = await fetch(CONFIG.scriptUrl + '?t=' + Date.now());
-    const rows = await res.json();
+  fetchJsonp(CONFIG.scriptUrl)
+    .then(rows => {
+      if (!Array.isArray(rows) || rows.length === 0) {
+        list.innerHTML = '<div class="lb-empty">Aucun score pour l\'instant. Sois le premier ! 🎉</div>';
+        return;
+      }
+      const medals  = ['🥇', '🥈', '🥉'];
+      const classes = ['gold', 'silver', 'bronze'];
+      list.innerHTML = rows.map((row, i) => {
+        const isMe = row.nickname === state.nickname;
+        return `<div class="lb-row${isMe ? ' is-me' : ''}${i < 3 ? ' ' + classes[i] : ''}">
+          <span class="lb-rank">${medals[i] || (i + 1)}</span>
+          <span class="lb-name">${esc(row.nickname)}${isMe ? ' 👈' : ''}</span>
+          <span class="lb-score">${row.score}/${row.max}</span>
+        </div>`;
+      }).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div class="lb-empty">Impossible de charger le classement.</div>';
+    });
+}
 
-    if (!Array.isArray(rows) || rows.length === 0) {
-      list.innerHTML = '<div class="lb-empty">Aucun score pour l\'instant. Sois le premier ! 🎉</div>';
-      return;
-    }
-
-    const medals  = ['🥇', '🥈', '🥉'];
-    const classes = ['gold', 'silver', 'bronze'];
-
-    list.innerHTML = rows.map((row, i) => {
-      const isMe = row.nickname === state.nickname;
-      return `<div class="lb-row${isMe ? ' is-me' : ''}${i < 3 ? ' ' + classes[i] : ''}">
-        <span class="lb-rank">${medals[i] || (i + 1)}</span>
-        <span class="lb-name">${esc(row.nickname)}${isMe ? ' 👈' : ''}</span>
-        <span class="lb-score">${row.score}/${row.max}</span>
-      </div>`;
-    }).join('');
-  } catch (_) {
-    list.innerHTML = '<div class="lb-empty">Impossible de charger le classement.</div>';
-  }
+function fetchJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb      = 'kiceki_cb_' + Date.now();
+    const script  = document.createElement('script');
+    const cleanup = () => { delete window[cb]; script.remove(); };
+    window[cb]    = data => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(); };
+    script.src    = url + '?callback=' + cb + '&t=' + Date.now();
+    document.head.appendChild(script);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
