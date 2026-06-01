@@ -692,7 +692,7 @@ function renderQuestion() {
   } else {
     banner.className = 'reveal-banner hidden';
     btnNext.classList.add('hidden');
-    btnVal.classList.toggle('hidden', !isMulti || sel.length === 0);
+    btnVal.classList.toggle('hidden', sel.length === 0);
   }
 }
 
@@ -707,14 +707,11 @@ document.querySelectorAll('.option-btn').forEach(btn => {
     if (q.answers.length > 1) {
       const pos = sel.indexOf(idx);
       if (pos === -1) sel.push(idx); else sel.splice(pos, 1);
-      saveState();
-      renderQuestion();
     } else {
       state.selections[state.currentIndex] = [idx];
-      state.status = 'confirmed';
-      saveState();
-      renderQuestion();
     }
+    saveState();
+    renderQuestion();
   });
 });
 
