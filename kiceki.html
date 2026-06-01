@@ -484,7 +484,7 @@
 //  CONFIGURATION — modifie ici pour personnaliser
 // ══════════════════════════════════════════════════════════════
 const CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbx_-ZPPcuB7z7YV_thEsXblfLOFroKWyfA1ZX63GKoYcJsTLVAs89agAUxPtNI2G84Xkg/exec',   // ← URL Google Apps Script (pour écrire les scores)
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbxDYV4rDStoVgkdpSyx7fVLWtRkny6Z8udM0kna6JNB-2GecXfPXXcehzDEAk7qkpY67A/exec',   // ← URL Google Apps Script (pour écrire les scores)
   sheetsId:  '1xBFaGpVeMjpvYs5KIj6ciiHCfie6KyPpU7rEeCkbeVc',   // ← ID du Google Sheet (dans l'URL : .../spreadsheets/d/{ICI}/edit)
                    //   Partager le sheet : "Tout le monde avec le lien" → Lecteur
 
@@ -535,7 +535,8 @@ function freshState() {
     status: 'nickname',
     nickname: '',
     currentIndex: 0,
-    selections: CONFIG.questions.map(() => [])
+    selections: CONFIG.questions.map(() => []),
+    playerId: Math.random().toString(36).slice(2) + Date.now().toString(36)
   };
 }
 
@@ -550,6 +551,7 @@ function loadState() {
     const s = JSON.parse(raw);
     if (s && typeof s.nickname === 'string' && Array.isArray(s.selections)) {
       while (s.selections.length < CONFIG.questions.length) s.selections.push([]);
+      if (!s.playerId) s.playerId = Math.random().toString(36).slice(2) + Date.now().toString(36);
       state = s;
     }
   } catch (_) {}
@@ -772,6 +774,12 @@ $('btn-submit').addEventListener('click', async () => {
   btn.textContent = 'Envoi en cours…';
 
   if (CONFIG.scriptUrl) {
+    let ip = '';
+    try {
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      ip = (await ipRes.json()).ip || '';
+    } catch (_) {}
+
     try {
       await fetch(CONFIG.scriptUrl, {
         method: 'POST',
@@ -780,6 +788,8 @@ $('btn-submit').addEventListener('click', async () => {
           nickname: state.nickname,
           score,
           max,
+          playerId: state.playerId,
+          ip,
           answers: JSON.stringify(
             state.selections.map(sel =>
               sel.map(idx => CONFIG.names[idx]).sort().join(', ')
@@ -827,7 +837,7 @@ function renderLeaderboard(myScore, myMax, alreadyPlayed) {
       const medals  = ['🥇', '🥈', '🥉'];
       const classes = ['gold', 'silver', 'bronze'];
       list.innerHTML = rows.map((row, i) => {
-        const isMe = row.nickname === state.nickname;
+        const isMe = row.id && state.playerId ? row.id === state.playerId : row.nickname === state.nickname;
         return `<div class="lb-row${isMe ? ' is-me' : ''}${i < 3 ? ' ' + classes[i] : ''}">
           <span class="lb-rank">${medals[i] || (i + 1)}</span>
           <span class="lb-name">${esc(row.nickname)}${isMe ? ' 👈' : ''}</span>
@@ -846,7 +856,7 @@ function fetchGviz(sheetId) {
   return new Promise((resolve, reject) => {
     const cb      = 'kiceki_gviz_' + Date.now();
     const tqx     = encodeURIComponent('out:json;responseHandler:' + cb);
-    const tq      = encodeURIComponent('SELECT B,C,D ORDER BY C DESC');
+    const tq      = encodeURIComponent('SELECT B,C,D,E ORDER BY C DESC');
     const script  = document.createElement('script');
     const cleanup = () => { delete window[cb]; script.remove(); };
     window[cb] = data => {
@@ -856,7 +866,8 @@ function fetchGviz(sheetId) {
           .map(r => ({
             nickname: r.c[0] && r.c[0].v ? String(r.c[0].v) : '',
             score:    r.c[1] ? Number(r.c[1].v) : 0,
-            max:      r.c[2] ? Number(r.c[2].v) : 0
+            max:      r.c[2] ? Number(r.c[2].v) : 0,
+            id:       r.c[3] && r.c[3].v ? String(r.c[3].v) : ''
           }))
           .filter(r => r.nickname);
         resolve(rows);
