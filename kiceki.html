@@ -484,7 +484,7 @@
 //  CONFIGURATION — modifie ici pour personnaliser
 // ══════════════════════════════════════════════════════════════
 const CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbyUtB6FpaMrJYzgebawdO_cwJ2R0qgyJjpTbO-3HpbXe_Uw6oDSaAKOtZuFvRT9Yl2ADA/exec',   // ← URL Google Apps Script (pour écrire les scores)
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbx_-ZPPcuB7z7YV_thEsXblfLOFroKWyfA1ZX63GKoYcJsTLVAs89agAUxPtNI2G84Xkg/exec',   // ← URL Google Apps Script (pour écrire les scores)
   sheetsId:  '1xBFaGpVeMjpvYs5KIj6ciiHCfie6KyPpU7rEeCkbeVc',   // ← ID du Google Sheet (dans l'URL : .../spreadsheets/d/{ICI}/edit)
                    //   Partager le sheet : "Tout le monde avec le lien" → Lecteur
 
@@ -772,7 +772,16 @@ $('btn-submit').addEventListener('click', async () => {
       await fetch(CONFIG.scriptUrl, {
         method: 'POST',
         mode:   'no-cors',
-        body:   new URLSearchParams({ nickname: state.nickname, score, max })
+        body:   new URLSearchParams({
+          nickname: state.nickname,
+          score,
+          max,
+          answers: JSON.stringify(
+            state.selections.map(sel =>
+              sel.map(idx => CONFIG.names[idx]).sort().join(', ')
+            )
+          )
+        })
       });
     } catch (_) {}
   }
